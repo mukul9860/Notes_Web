@@ -2,49 +2,123 @@ const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/authMiddleware');
 
-router.get('/', auth, (req, res) => {
+const query = (req, sql, params) => {
+    return new Promise((resolve, reject) => {
+        req.db.query(sql, params, (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+        });
+    });
+};
+
+router.get('/', auth, async (req, res) => {
     const { search, is_archived } = req.query;
-    let query = `SELECT * FROM notes WHERE is_archived = ? AND user_id = ?`; 
-    let params = [is_archived === 'true' ? 1 : 0, req.user.id];
+    
+    let sql = `
+        SELECT n.*, GROUP_CONCAT(t.name) as tags 
+        FROM notes n
+        LEFT JOIN note_tags nt ON n.id = nt.note_id
+        LEFT JOIN tags t ON nt.tag_id = t.id
+        WHERE n.user_id = ? AND n.is_archived = ?
+    `;
+    
+    const params = [req.user.id, is_archived === 'true' ? 1 : 0];
 
     if (search) {
-        query += ` AND (title LIKE ? OR content LIKE ?)`;
-        params.push(`%${search}%`, `%${search}%`);
+        sql += ` AND (n.title LIKE ? OR n.content LIKE ? OR t.name LIKE ?)`;
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
     }
-    
-    query += ` ORDER BY last_edited DESC`;
 
-    req.db.query(query, params, (err, results) => {
-        if (err) return res.status(500).send(err);
-        res.json(results);
-    });
+    sql += ` GROUP BY n.id ORDER BY n.last_edited DESC`;
+
+    try {
+        const results = await query(req, sql, params);
+        const notes = results.map(note => ({
+            ...note,
+            tags: note.tags ? note.tags.split(',') : []
+        }));
+        res.json(notes);
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
-router.post('/', auth, (req, res) => {
-    const { title, content } = req.body;
-    if (!title) return res.status(400).send({ message: "Title is required" });
+router.post('/', auth, async (req, res) => {
+    const { title, content, tags } = req.body;
+    if (!title) return res.status(400).json({ message: "Title is required" });
 
-    const sql = `INSERT INTO notes (user_id, title, content) VALUES (?, ?, ?)`;
-    req.db.query(sql, [req.user.id, title, content], (err, result) => {
-        if (err) return res.status(500).send(err);
-        res.json({ id: result.insertId, ...req.body });
-    });
+    try {
+        const noteResult = await query(req, 
+            `INSERT INTO notes (user_id, title, content) VALUES (?, ?, ?)`, 
+            [req.user.id, title, content]
+        );
+        const noteId = noteResult.insertId;
+
+        if (tags && tags.length > 0) {
+            for (const tagName of tags) {
+                let tagResult = await query(req, `SELECT id FROM tags WHERE name = ?`, [tagName]);
+                let tagId;
+                
+                if (tagResult.length === 0) {
+                    const newTag = await query(req, `INSERT INTO tags (name) VALUES (?)`, [tagName]);
+                    tagId = newTag.insertId;
+                } else {
+                    tagId = tagResult[0].id;
+                }
+
+                await query(req, `INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)`, [noteId, tagId]);
+            }
+        }
+
+        res.status(201).json({ id: noteId, title, content, tags });
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
-router.put('/:id', (req, res) => {
-    const { title, content, is_archived } = req.body;
-    const sql = `UPDATE notes SET title=?, content=?, is_archived=? WHERE id=?`;
-    req.db.query(sql, [title, content, is_archived, req.params.id], (err) => {
-        if (err) return res.status(500).send(err);
+router.put('/:id', auth, async (req, res) => {
+    const { title, content, is_archived, tags } = req.body;
+    const noteId = req.params.id;
+
+    try {
+        const check = await query(req, `SELECT id FROM notes WHERE id = ? AND user_id = ?`, [noteId, req.user.id]);
+        if (check.length === 0) return res.status(403).json({ message: "Not authorized to edit this note" });
+
+        await query(req, 
+            `UPDATE notes SET title=?, content=?, is_archived=? WHERE id=?`, 
+            [title, content, is_archived, noteId]
+        );
+        if (tags) {
+            await query(req, `DELETE FROM note_tags WHERE note_id = ?`, [noteId]);
+            for (const tagName of tags) {
+                let tagResult = await query(req, `SELECT id FROM tags WHERE name = ?`, [tagName]);
+                let tagId;
+                if (tagResult.length === 0) {
+                    const newTag = await query(req, `INSERT INTO tags (name) VALUES (?)`, [tagName]);
+                    tagId = newTag.insertId;
+                } else {
+                    tagId = tagResult[0].id;
+                }
+                await query(req, `INSERT INTO note_tags (note_id, tag_id) VALUES (?, ?)`, [noteId, tagId]);
+            }
+        }
+
         res.json({ success: true });
-    });
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
-router.delete('/:id', (req, res) => {
-    req.db.query(`DELETE FROM notes WHERE id = ?`, [req.params.id], (err) => {
-        if (err) return res.status(500).send(err);
+router.delete('/:id', auth, async (req, res) => {
+    try {
+        const check = await query(req, `SELECT id FROM notes WHERE id = ? AND user_id = ?`, [req.params.id, req.user.id]);
+        if (check.length === 0) return res.status(403).json({ message: "Not authorized to delete this note" });
+
+        await query(req, `DELETE FROM notes WHERE id = ?`, [req.params.id]);
         res.json({ success: true });
-    });
+    } catch (err) {
+        res.status(500).json(err);
+    }
 });
 
 module.exports = router;
