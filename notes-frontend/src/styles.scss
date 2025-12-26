@@ -1,1 +1,56 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --primary-blue: #335CFF;
+  --primary-hover: #254EDB;
+  --bg-light: #F3F5F8;
+  --bg-white: #FFFFFF;
+  --text-main: #0D0E10;
+  --text-secondary: #74777E;
+  --border-color: #E0E2E5;
+  --danger: #EF4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-light);
+  color: var(--text-main);
+  height: 100vh;
+  overflow: hidden;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+
+  &.btn-primary {
+    background-color: var(--primary-blue);
+    color: white;
+    &:hover { background-color: var(--primary-hover); }
+  }
+
+  &.btn-secondary {
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    &:hover { background-color: #e5e7eb; }
+  }
+  
+  &.btn-danger {
+    color: var(--danger);
+    background: transparent;
+    border: 1px solid var(--border-color);
+    &:hover { background-color: #FEF2F2; }
+  }
+}
+
+input, textarea {
+  font-family: 'Inter', sans-serif;
+  &:focus { outline: 2px solid var(--primary-blue); border-color: transparent; }
+}

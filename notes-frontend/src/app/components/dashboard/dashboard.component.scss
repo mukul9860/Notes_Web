@@ -1,0 +1,18 @@
+.app-layout { display: grid; grid-template-columns: 260px 350px 1fr; height: 100vh; overflow: hidden; }
+.sidebar { border-right: 1px solid var(--border-color); background: white; }
+.note-list-panel { border-right: 1px solid var(--border-color); background: white; }
+.main-content { background: white; position: relative; }
+
+@media (max-width: 1024px) { .app-layout { grid-template-columns: 80px 300px 1fr; } }
+
+@media (max-width: 768px) {
+  .app-layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .note-list-panel { width: 100%; &.hidden-mobile { display: none; } }
+  .main-content {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    transform: translateX(100%); transition: transform 0.3s ease; z-index: 50;
+    &.active-mobile { transform: translateX(0); }
+  }
+  .back-btn { padding: 1rem; border: none; background: transparent; cursor: pointer; }
+}

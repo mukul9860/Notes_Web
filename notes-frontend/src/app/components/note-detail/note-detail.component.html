@@ -1,0 +1,17 @@
+<div class="detail-container" *ngIf="note; else emptyState">
+  <header>
+    <input type="text" [(ngModel)]="note.title" class="title-input" placeholder="Note Title">
+    <div class="meta-row">
+      <div class="tags-input-wrapper">
+        <i class="fas fa-tag"></i>
+        <input type="text" [(ngModel)]="tagInput" placeholder="Tags (e.g. Dev, React)">
+      </div>
+      <button class="btn btn-danger" (click)="deleteNote()"><i class="fas fa-trash"></i></button>
+    </div>
+  </header>
+  <textarea [(ngModel)]="note.content" class="content-area" placeholder="Start typing..."></textarea>
+  <div class="footer"><button class="btn btn-primary" (click)="save()">Save Note</button></div>
+</div>
+<ng-template #emptyState>
+  <div class="empty-state"><i class="fas fa-book-open"></i><p>Select a note to view</p></div>
+</ng-template>

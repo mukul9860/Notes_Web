@@ -1,0 +1,17 @@
+<div class="list-header">
+  <h2>All Notes</h2>
+  <button class="btn btn-primary" (click)="createNew()">+ New Note</button>
+</div>
+<div class="search-box">
+  <i class="fas fa-search"></i>
+  <input type="text" placeholder="Search..." (input)="fetchNotes($any($event.target).value)">
+</div>
+<div class="list-content">
+  <div *ngFor="let note of notes" class="note-card" [class.active]="note.id === selectedNoteId" (click)="onSelect(note)">
+    <h3 class="note-title">{{ note.title }}</h3>
+    <div class="note-tags" *ngIf="note.tags?.length">
+      <span *ngFor="let tag of note.tags" class="badge">{{ tag }}</span>
+    </div>
+    <div class="note-date">{{ note.last_edited | date:'mediumDate' }}</div>
+  </div>
+</div>

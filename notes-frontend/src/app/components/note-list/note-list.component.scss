@@ -1,0 +1,15 @@
+.list-header { padding: 1.5rem; border-bottom: 1px solid var(--border-color); h2 { margin-bottom: 1rem; } .btn-primary { width: 100%; } }
+.search-box {
+  padding: 1rem 1.5rem; position: relative;
+  i { position: absolute; left: 2.5rem; top: 1.8rem; color: var(--text-secondary); }
+  input { width: 100%; padding: 0.75rem 0.75rem 0.75rem 2.5rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-light); }
+}
+.list-content { overflow-y: auto; height: calc(100vh - 180px); }
+.note-card {
+  padding: 1.5rem; border-bottom: 1px solid var(--border-color); cursor: pointer;
+  &:hover { background-color: var(--bg-light); }
+  &.active { background-color: #EFF6FF; border-left: 4px solid var(--primary-blue); }
+  .note-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .note-tags { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; .badge { background: #E5E7EB; font-size: 0.75rem; padding: 0.2rem 0.5rem; rounded: 4px; } }
+  .note-date { font-size: 0.75rem; color: var(--text-secondary); }
+}

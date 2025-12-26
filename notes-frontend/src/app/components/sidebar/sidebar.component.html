@@ -1,0 +1,14 @@
+<div class="sidebar-container">
+  <div class="brand"><i class="fas fa-feather-alt"></i> <span>Notes</span></div>
+  <nav class="nav-links">
+    <a class="nav-item active"><i class="fas fa-home"></i> All Notes</a>
+    <a class="nav-item"><i class="fas fa-archive"></i> Archived</a>
+  </nav>
+  <div class="tags-section">
+    <h3>Tags</h3>
+    <div class="tag-list">
+      <div *ngFor="let tag of tags" class="tag-item"><i class="fas fa-tag"></i> {{ tag }}</div>
+    </div>
+  </div>
+  <button (click)="logout()" class="nav-item logout"><i class="fas fa-sign-out-alt"></i> Logout</button>
+</div>

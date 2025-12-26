@@ -1,0 +1,42 @@
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="logo">
+      <i class="fas fa-feather-alt"></i> Notes
+    </div>
+    <h2>Create Account</h2>
+    
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label>Username</label>
+        <input 
+          type="text" 
+          [(ngModel)]="username" 
+          name="username" 
+          required 
+          placeholder="Choose a username"
+        >
+      </div>
+      
+      <div class="form-group">
+        <label>Password</label>
+        <input 
+          type="password" 
+          [(ngModel)]="password" 
+          name="password" 
+          required 
+          placeholder="Choose a strong password"
+        >
+      </div>
+
+      <p class="error-msg" *ngIf="errorMessage">
+        <i class="fas fa-exclamation-circle"></i> {{ errorMessage }}
+      </p>
+
+      <button type="submit" class="btn btn-primary w-full">Sign Up</button>
+    </form>
+    
+    <div class="footer">
+      Already have an account? <a routerLink="/login">Log In</a>
+    </div>
+  </div>
+</div>

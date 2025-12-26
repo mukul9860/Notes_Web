@@ -1,0 +1,12 @@
+<div class="app-layout">
+  <aside class="sidebar"><app-sidebar></app-sidebar></aside>
+
+  <div class="note-list-panel" [class.hidden-mobile]="selectedNoteId && isMobile">
+    <app-note-list (noteSelected)="onNoteSelected($event)"></app-note-list>
+  </div>
+
+  <main class="main-content" [class.active-mobile]="selectedNoteId && isMobile">
+    <button *ngIf="isMobile" (click)="selectedNoteId = null" class="back-btn"><i class="fas fa-arrow-left"></i> Back</button>
+    <app-note-detail [noteId]="selectedNoteId" (refreshList)="refreshList()"></app-note-detail>
+  </main>
+</div>
