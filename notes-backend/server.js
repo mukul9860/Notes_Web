@@ -2,25 +2,32 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const bodyParser = require('body-parser');
+
 const authRoutes = require('./routes/auth');
 const noteRoutes = require('./routes/notes');
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+const PORT = 4000;
 
-// Database Connection
-const db = mysql.createConnection({
-    host: 'localhost',
+app.use(cors());
+app.use(express.json());
+
+const db = mysql.createPool({
+    host: '127.0.0.1',
     user: 'root',
-    password: '',
-    database: 'notes_app'
+    password: '68585@9860',
+    database: 'notes_app',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-db.connect(err => {
-    if (err) console.log('DB Connection Error:', err);
-    else console.log('MySQL Connected...');
+db.getConnection((err, connection) => {
+    if (err) console.error('❌ Database Connection Failed:', err.code);
+    else {
+        console.log('✅ Connected to MySQL Database');
+        connection.release();
+    }
 });
 
 app.use((req, res, next) => {
@@ -31,5 +38,6 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/notes', noteRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+});

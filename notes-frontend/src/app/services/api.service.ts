@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/api/notes';
+  private apiUrl = 'http://localhost:4000/api/notes';
   constructor(private http: HttpClient) {}
 
   getNotes(search: string = '', archived: boolean = false) {
